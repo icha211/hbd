@@ -1,0 +1,173 @@
+:root {
+    --soft-pink: #ffdae9;
+    --soft-blue: #daedff;
+    --text-color: #444;
+    --success-pink: #ff69b4;
+    --error-red: #ff5e5e;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Instrument Sans", sans-serif;
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    background: #fdfbff; /* Soft near-white background */
+}
+
+/* Background Animated Blobs */
+body::before, body::after {
+    content: "";
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    z-index: -1;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: moveBlobs 10s ease-in-out infinite alternate;
+}
+
+body::before {
+    background: var(--soft-pink);
+    top: -200px;
+    right: -200px;
+}
+
+body::after {
+    background: var(--soft-blue);
+    bottom: -200px;
+    left: -200px;
+    animation-delay: -5s;
+}
+
+@keyframes moveBlobs {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+/* The Dialogue Box (White, rounded, floating) */
+.dialogue-box {
+    width: 450px;
+    background: white;
+    padding: 40px;
+    border-radius: 40px; /* Large rounded corners as requested */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08); /* Soft floating shadow */
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Glass feel */
+    backdrop-filter: blur(10px); /* Just in case it's on an overlay */
+    animation: floating 4s ease-in-out infinite;
+}
+
+@keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+}
+
+#heart-container {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 50px;
+}
+
+#output {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding-bottom: 25px;
+    text-align: center;
+    min-height: 120px;
+}
+
+#output p {
+    margin: 12px 0;
+    line-height: 1.6;
+    font-size: 18px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#input-line {
+    display: flex;
+    background: #f8f9fc;
+    padding: 15px 20px;
+    border-radius: 20px;
+    border: 1px solid #edf0f5;
+    transition: all 0.3s ease;
+}
+
+#input-line:focus-within {
+    border-color: var(--soft-pink);
+    box-shadow: 0 0 10px rgba(255, 218, 233, 0.5);
+    background: #fff;
+}
+
+#prompt {
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+#userInput {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: 17px;
+    flex-grow: 1;
+    outline: none;
+}
+
+#userInput::placeholder {
+    color: #ccc;
+    font-style: italic;
+}
+
+.error {
+    color: var(--error-red);
+    font-size: 15px !important;
+    background: #fffafa;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.success {
+    color: var(--success-pink);
+    font-weight: bold;
+    font-size: 20px !important;
+}
+
+.shadowy {
+    color: #bbb;
+    font-size: 14px;
+    font-style: italic;
+    text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.05); /* Very subtle "shadowy" feel */
+    margin-top: 4px;
+    display: block; /* Placing it on a new line makes it look like a quiet hint */
+}
+
+/* GIF in the dialogue box */
+.terminal-gif {
+    max-width: 150px;
+    border-radius: 12px;
+    margin: 10px auto;
+    display: block;
+    animation: fadeIn 0.5s ease-out;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+#heart {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-block;
+}

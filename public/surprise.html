@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counting Down... | For My One</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        .countdown-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .dialogue-box {
+            width: 450px;
+            min-height: 400px; /* Base height */
+            background: white;
+            padding: 40px;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center all items horizontally */
+            z-index: 10;
+            transition: all 0.3s ease, width 0.5s ease, height 0.5s ease; /* Fast & smooth resize */
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            animation: floating 4s ease-in-out infinite;
+            overflow: visible; /* Allow numbers to grow without clipping */
+        }
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Align numbers and labels to bottom as they grow */
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: nowrap;
+            width: 100%;
+            transition: gap 0.5s ease;
+        }
+        .countdown-item {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: fit-content;
+        }
+        .countdown-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--success-pink);
+            display: block;
+            transition: all 0.5s ease;
+            white-space: nowrap;
+        }
+        .countdown-label {
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        #surprise-message {
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .bubu-gif {
+            max-width: 150px;
+            margin: 0 auto 20px;
+            display: block;
+            border-radius: 15px;
+        }
+        .surprise-gifs {
+            display: none; /* Hidden during countdown */
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+        .surprise-gifs img {
+            max-width: 100px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.5s ease;
+        }
+        .surprise-gifs img.center-gif {
+            max-width: 140px; /* Make the cake/center one a bit bigger */
+        }
+        /* Custom slide layouts */
+        .slide-content {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.8s ease;
+        }
+        .note-text {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #555;
+            margin: 20px 0;
+            white-space: pre-line; /* Support \n */
+            text-align: center;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .unlock-button {
+            background-color: var(--soft-blue);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-weight: 600;
+            color: #555;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        .unlock-button:hover {
+            background-color: var(--soft-pink);
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(255, 192, 203, 0.4);
+        }
+        #status-msg {
+            margin-top: 20px;
+            font-size: 16px;
+            color: var(--success-pink);
+            min-height: 48px;
+            font-weight: 500;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        /* Candle Blowing Styles */
+        #cake-wrapper {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 300px;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .candle-count-display {
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: inherit;
+            font-size: 18px;
+            color: #6A4B18;
+            background-color: #F0E4D0;
+            padding: 8px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            width: fit-content;
+            border: 2px solid #553C13;
+        }
+        .candle-count-display span { font-weight: bold; color: #AD030F; }
+
+        .cake {
+            position: relative;
+            width: 250px;
+            height: 200px;
+        }
+        .plate {
+            width: 270px;
+            height: 110px;
+            position: absolute;
+            bottom: -10px;
+            left: -10px;
+            background-color: #ccc;
+            border-radius: 50%;
+            box-shadow: 0 2px 0 #b3b3b3, 0 4px 0 #b3b3b3, 0 5px 40px rgba(0, 0, 0, 0.1);
+        }
+        .cake > * { position: absolute; }
+        .layer {
+            position: absolute;
+            display: block;
+            width: 250px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #553c13;
+            box-shadow: 0 2px 0px #6a4b18, 0 4px 0px #33240b, 0 6px 0px #32230b, 0 8px 0px #31230b, 0 10px 0px #30220b, 0 12px 0px #2f220b, 0 14px 0px #2f210a, 0 16px 0px #2e200a, 0 18px 0px #2d200a, 0 20px 0px #2c1f0a, 0 22px 0px #2b1f0a, 0 24px 0px #2a1e09, 0 26px 0px #2a1d09, 0 28px 0px #291d09, 0 30px 0px #281c09;
+        }
+        .layer-top { top: 0px; }
+        .layer-middle { top: 33px; }
+        .layer-bottom { top: 66px; }
+        .icing {
+            top: 2px;
+            left: 5px;
+            background-color: #f0e4d0;
+            width: 240px;
+            height: 90px;
+            border-radius: 50%;
+        }
+        .icing:before {
+            content: "";
+            position: absolute;
+            top: 4px; right: 5px; bottom: 6px; left: 5px;
+            background-color: #f4ebdc;
+            box-shadow: 0 0 4px #f6efe3;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .drip {
+            display: block; width: 50px; height: 60px;
+            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px;
+            background-color: #f0e4d0; 
+        }
+        .drip1 { top: 53px; left: 5px; transform: skewY(15deg); height: 48px; width: 40px; }
+        .drip2 { top: 69px; left: 181px; transform: skewY(-15deg); }
+        .drip3 { top: 54px; left: 90px; width: 80px; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; }
+        
+        .candle {
+            background-color: #7B020B;
+            width: 12px; height: 35px;
+            border-radius: 6px/3px;
+            position: absolute;
+            z-index: 10;
+        }
+        .candle:before {
+            content: ""; position: absolute; top: 0; left: 0; width: 12px; height: 6px;
+            border-radius: 50%; background-color: #ad030f;
+        }
+        .candle.out .flame { display: none; }
+        .flame {
+            position: absolute; background-color: orange;
+            width: 10px; height: 25px;
+            border-radius: 8px/20px;
+            top: -34px; left: 50%; margin-left: -5px;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(255, 165, 0, 0.5), 0 0 20px rgba(255, 165, 0, 0.5);
+            transform-origin: 50% 90%;
+            animation: flicker 1s ease-in-out alternate infinite;
+        }
+        @keyframes flicker {
+            0% { transform: skewX(5deg); opacity: 0.8; }
+            100% { transform: skewX(-5deg); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="overlay">
+    <div class="background-blobs">
+        <div class="blob pink"></div>
+        <div class="blob blue"></div>
+    </div>
+    <div class="dialogue-box">
+        <div id="heart-container">
+            <span id="heart">💖</span>
+        </div>
+        
+        <!-- ELEMENT CONTAINERS -->
+        <div id="main-visuals">
+            <img id="bubu-main" src="bubu-cake.gif" alt="Bubu Dudu" class="bubu-gif">
+            
+            <div id="gifs-container-1" class="surprise-gifs">
+                <img src="bubu-dudu-bubu-dudu-happy.gif" alt="Happy Bubu" style="max-width: 160px;">
+                <img src="bday.gif" alt="Birthday Cake" class="center-gif" style="max-width: 200px;">
+                <img src="tkthao219-bubududu.gif" alt="Love Bubu" style="max-width: 160px;">
+            </div>
+
+            <!-- Slide 2 Assets -->
+            <div id="gifs-container-2" class="surprise-gifs">
+                <img src="heart.gif" alt="Heart" style="max-width: 250px;">
+            </div>
+
+            <!-- Slide 3 Assets -->
+            <div id="gifs-container-3" class="surprise-gifs">
+                <img src="white-cute-cat-hearts.gif" alt="Cute Cat" style="max-width: 180px;">
+                <img src="bub-bubee.gif" alt="Bub Bubee" style="max-width: 210px;">
+                <img src="bear-clap-clap.gif" alt="Bear Clap" style="max-width: 180px;">
+            </div>
+
+            <!-- Slide 4: Cake & Candle -->
+            <div id="cake-wrapper">
+                <div class="candle-count-display">
+                    Candles on the Cake: <span id="candleCount">0</span>
+                </div>
+                <div class="cake">
+                    <div class="plate"></div>
+                    <div class="layer layer-bottom"></div>
+                    <div class="layer layer-middle"></div>
+                    <div class="layer layer-top"></div>
+                    <div class="icing"></div>
+                    <div class="drip drip1"></div>
+                    <div class="drip drip2"></div>
+                    <div class="drip drip3"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="surprise-message">
+            Counting down to your special day... 🎂
+        </div>
+
+        <div class="countdown-container">
+            <div class="countdown-item">
+                <span id="days" class="countdown-number">00</span>
+                <span class="countdown-label">Days</span>
+            </div>
+            <div class="countdown-item">
+                <span id="hours" class="countdown-number">00</span>
+                <span class="countdown-label">Hours</span>
+            </div>
+            <div class="countdown-item">
+                <span id="minutes" class="countdown-number">00</span>
+                <span class="countdown-label">Mins</span>
+            </div>
+            <div class="countdown-item">
+                <span id="seconds" class="countdown-number">00</span>
+                <span class="countdown-label">Secs</span>
+            </div>
+        </div>
+
+        <div id="note-container" class="note-text" style="display: none;"></div>
+
+        <button id="unlock-btn" class="unlock-button">Click here for the surprise!</button>
+        <p id="status-msg"></p>
+    </div>
+
+    <script>
+        // Set target date - Feb 24, 2026
+        const targetDate = new Date("February 24, 2026 03:20:00").getTime();
+        let countdownEnded = false;
+        let lastPlayedSecond = -1;
+        let audioEnabled = false;
+        let currentSlide = 0; // 0: Countdown, 1: Bday Reveal, 2: Heart Note, 3: Long Note
+
+        // PRELOAD AUDIO to eliminate delay
+        const audioCache = {};
+        const soundKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'bday', 'hbd-song', 'alamak-song'];
+        
+        soundKeys.forEach(key => {
+            let src;
+            if (key === 'bday') src = './coutdown_audio/happybirthdaysayangku.MP3';
+            else if (key === 'hbd-song') src = './happybirthdaysong.m4a';
+            else if (key === 'alamak-song') src = './Rizky Febian & Adrian Khalif - Alamak (Official Lyric Video) - Emotion Entertainment.mp3';
+            else src = `./coutdown_audio/${key}.MP3`;
+
+            const audio = new Audio(src);
+            
+            // Set background music volumes to be "smaller" / more cinematic
+            if (key === 'alamak-song') audio.volume = 0.3; // 30% volume
+            if (key === 'hbd-song') audio.volume = 1.0;    // Full volume for bday song
+            if (key === 'bday') audio.volume = 0.8;        // Voice message
+
+            audio.load();
+            audioCache[key] = audio;
+
+            // Debugging logs to see if files load correctly
+            audio.addEventListener('error', (e) => console.log(`Error loading ${key}:`, e));
+        });
+
+        function enableAudio() {
+            if (audioEnabled) return;
+            console.log("Audio enabled by user interaction");
+            Object.values(audioCache).forEach(sound => {
+                sound.play().then(() => { 
+                    sound.pause(); 
+                    sound.currentTime = 0; 
+                }).catch(e => console.log("Initial play error:", e));
+            });
+            audioEnabled = true;
+
+            // START background music immediately (on Slide 0 or later)
+            // But only if we aren't at the candle blow slide yet
+            if (currentSlide < 4) {
+                playSound('alamak-song');
+            }
+        }
+
+        window.addEventListener('click', enableAudio);
+        window.addEventListener('touchstart', enableAudio);
+
+        function playSound(key) {
+            const sound = audioCache[key];
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Blocked"));
+            }
+        }
+
+        function showSlide(slideNum) {
+            currentSlide = slideNum;
+            const msg = document.getElementById("surprise-message");
+            const btn = document.getElementById("unlock-btn");
+            const status = document.getElementById("status-msg");
+            const note = document.getElementById("note-container");
+            const countdown = document.querySelector(".countdown-container");
+            const bubuMain = document.getElementById("bubu-main");
+            const g1 = document.getElementById("gifs-container-1");
+            const g2 = document.getElementById("gifs-container-2");
+            const g3 = document.getElementById("gifs-container-3");
+            const cakeWrapper = document.getElementById("cake-wrapper");
+
+            // Reset visibility
+            [bubuMain, g1, g2, g3, cakeWrapper, countdown, note].forEach(el => el.style.display = "none");
+            msg.style.display = "block"; // Default message display
+
+            if (slideNum === 1) {
+                // Finale Countdown Reveal
+                msg.innerHTML = "HAPPY BIRTHDAY MANISKU SAYANGGG! 🎂✨";
+                g1.style.display = "flex";
+                status.style.display = "block";
+                status.innerHTML = "there's more to waiting... click to find out";
+                btn.innerHTML = "tap me 🥰";
+                btn.style.display = "block";
+                
+                const dialogueBox = document.querySelector('.dialogue-box');
+                dialogueBox.style.width = "750px"; 
+                dialogueBox.style.boxShadow = "0 0 120px rgba(255, 105, 180, 0.4)";
+                
+                playSound('bday');
+                // Alamak song is already started during countdown interaction
+                triggerExplosion();
+            } 
+            else if (slideNum === 2) {
+                // Heart Slide
+                msg.style.display = "none"; // Hide message above the gif in slide 2
+                g2.style.display = "flex";
+                status.style.display = "none";
+                note.style.display = "block";
+                note.innerHTML = "cieee satu umur lebih tua nich\ntapii kok makin tambah umur makin maniss aja niii pacarkuuuuu, nda adill nichh wkkw saltingg hihi";
+                btn.innerHTML = "ada lagii sayang";
+                
+                const dialogueBox = document.querySelector('.dialogue-box');
+                dialogueBox.style.width = "450px";
+            }
+            else if (slideNum === 3) {
+                // Long Note Slide
+                msg.innerHTML = "To My Special One... ✨";
+                g3.style.display = "flex";
+                note.style.display = "block";
+                note.innerHTML = "you have been through a lot selama tahun ini and your achievement your ambition your highest dream that you always reach it its something im very look up to! 🥺💖 ayangg akuu kokk kerenn bangett sihh 😭✨\n\nsemoga semua cita cita sayangku terwujud, sukses karirnya, dilancarkan S2 Supply Chain di luar negri, dan sehat selalu \nsemoga ada aku yang di samping ayangku hihii aminnn 🤲🏻💗";
+                btn.innerHTML = "tenang ada lagi";
+                
+                const dialogueBox = document.querySelector('.dialogue-box');
+                dialogueBox.style.width = "850px"; // Wider for the 3 gifs and text
+            }
+            else if (slideNum === 4) {
+                // Stop the first bday sounds if they are still playing
+                if (audioCache['bday']) {
+                    audioCache['bday'].pause();
+                    audioCache['bday'].currentTime = 0;
+                }
+                if (audioCache['alamak-song']) {
+                    audioCache['alamak-song'].pause();
+                    audioCache['alamak-song'].currentTime = 0;
+                }
+                playSound('hbd-song');
+
+                // Candle Blow Slide
+                msg.innerHTML = "Now make a wish sayang and blow the candle! 🎂✨";
+                cakeWrapper.style.display = "flex";
+                note.style.display = "block";
+                note.innerHTML = "Happy 23rd Birthday! 🕯️";
+                btn.innerHTML = "Finish ❤️";
+                btn.style.display = "none"; 
+                
+                const dialogueBox = document.querySelector('.dialogue-box');
+                dialogueBox.style.width = "600px";
+                initCandleLogic();
+
+                // Distributed layout for 23 candles (Outer ring 15, Inner ring 8)
+                const positions = [];
+                const centerX = 125;
+                const centerY = 35; // Shifted up slightly
+
+                // Outer Ring - Restricted more to the center of the icing
+                for (let i = 0; i < 15; i++) {
+                    const angle = (i / 15) * Math.PI * 2;
+                    positions.push({
+                        left: centerX + Math.cos(angle) * 75,
+                        top: centerY + Math.sin(angle) * 20
+                    });
+                }
+                // Inner Ring
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2 + 0.2;
+                    positions.push({
+                        left: centerX + Math.cos(angle) * 35,
+                        top: centerY + Math.sin(angle) * 10
+                    });
+                }
+
+                // Sort by 'top' so candles in the back are rendered behind candles in the front
+                positions.sort((a, b) => a.top - b.top);
+                
+                positions.forEach(pos => addCandle(pos.left, pos.top));
+            }
+        }
+
+        function triggerExplosion() {
+            const colors = ['#ffc0cb', '#daedff', '#ffffff', '#ff69b4'];
+            confetti({ particleCount: 150, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, colors: colors });
+            confetti({ particleCount: 150, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, colors: colors });
+            confetti({ particleCount: 150, angle: -90, spread: 120, origin: { x: 0.5, y: 0 }, colors: colors });
+            confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: colors });
+        }
+
+        function updateCountdown() {
+            if (currentSlide > 0) return;
+
+            const now = Date.now();
+            const distance = targetDate - now;
+
+            if (distance <= 0) {
+                if (!countdownEnded) {
+                    document.getElementById("seconds").innerText = "00";
+                    if (lastPlayedSecond !== 0) {
+                        playSound('0');
+                        lastPlayedSecond = 0;
+                        setTimeout(() => {
+                            countdownEnded = true;
+                            showSlide(1);
+                        }, 1200);
+                    }
+                }
+                return;
+            }
+
+            const totalSecondsDisplay = Math.ceil(distance / 1000);
+            if (totalSecondsDisplay <= 10 && totalSecondsDisplay >= 1 && totalSecondsDisplay !== lastPlayedSecond) {
+                playSound(totalSecondsDisplay);
+                lastPlayedSecond = totalSecondsDisplay;
+            }
+
+            const d = Math.floor(totalSecondsDisplay / (60 * 60 * 24));
+            const h = Math.floor((totalSecondsDisplay % (60 * 60 * 24)) / (60 * 60));
+            const m = Math.floor((totalSecondsDisplay % (60 * 60)) / 60);
+            const s = totalSecondsDisplay % 60;
+
+            document.getElementById("days").innerText = d.toString().padStart(2, '0');
+            document.getElementById("hours").innerText = h.toString().padStart(2, '0');
+            document.getElementById("minutes").innerText = m.toString().padStart(2, '0');
+            document.getElementById("seconds").innerText = s.toString().padStart(2, '0');
+
+            if (distance <= 10000) {
+                const progress = 1 - (distance / 10000); 
+                document.querySelectorAll('.countdown-number').forEach(el => {
+                    el.style.fontSize = `${32 + (progress * 80)}px`;
+                    el.style.fontWeight = `${Math.floor(700 + (progress * 200))}`;
+                    el.style.transform = `scale(${1 + (progress * 0.3)})`;
+                });
+                const dialogueBox = document.querySelector('.dialogue-box');
+                dialogueBox.style.width = `${450 + Math.floor(progress * 350)}px`;
+                dialogueBox.style.minHeight = `${400 + Math.floor(progress * 120)}px`;
+            }
+        }
+
+        // Candle Blowing Logic
+        let candles = [];
+        let audioContext;
+        let analyser;
+        let microphone;
+        let candleLogicInitialized = false;
+
+        function updateCandleCount() {
+            const candleCountDisplay = document.getElementById("candleCount");
+            const activeCandles = candles.filter(c => !c.classList.contains("out")).length;
+            candleCountDisplay.textContent = activeCandles;
+            if (activeCandles === 0 && candles.length > 0) {
+                document.getElementById("unlock-btn").style.display = "block";
+                document.getElementById("note-container").innerHTML = "Yay! Happy Birthday Sayanggg! ❤️🎂";
+            }
+        }
+
+        function addCandle(left, top) {
+            const cake = document.querySelector(".cake");
+            const candle = document.createElement("div");
+            candle.className = "candle";
+            candle.style.left = left + "px";
+            candle.style.top = top + "px";
+
+            const flame = document.createElement("div");
+            flame.className = "flame";
+            candle.appendChild(flame);
+
+            cake.appendChild(candle);
+            candles.push(candle);
+            updateCandleCount();
+        }
+
+        function initCandleLogic() {
+            if (candleLogicInitialized) return;
+            candleLogicInitialized = true;
+
+            function isBlowing() {
+                if (!analyser) return false;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                analyser.getByteFrequencyData(dataArray);
+
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                let average = sum / bufferLength;
+                return average > 40; 
+            }
+
+            function blowOutCandles() {
+                let blownOut = 0;
+                if (isBlowing()) {
+                    candles.forEach((candle) => {
+                        if (!candle.classList.contains("out") && Math.random() > 0.5) {
+                            candle.classList.add("out");
+                            blownOut++;
+                        }
+                    });
+                }
+                if (blownOut > 0) updateCandleCount();
+            }
+
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function (stream) {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        analyser = audioContext.createAnalyser();
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        microphone.connect(analyser);
+                        analyser.fftSize = 256;
+                        setInterval(blowOutCandles, 200);
+                    })
+                    .catch(function (err) {
+                        console.log("Unable to access microphone: " + err);
+                    });
+            }
+        }
+
+        const unlockBtn = document.getElementById("unlock-btn");
+        unlockBtn.addEventListener("click", () => {
+            enableAudio();
+            if (currentSlide === 0) {
+                const now = Date.now();
+                if (now < targetDate) {
+                    const status = document.getElementById("status-msg");
+                    status.style.color = "#888";
+                    status.innerText = "Bentar sayang sabar hehe, wait for your birth date then you can unlock the surprise... ✨";
+                }
+            } else if (currentSlide === 1) {
+                showSlide(2);
+            } else if (currentSlide === 2) {
+                showSlide(3);
+            } else if (currentSlide === 3) {
+                showSlide(4);
+            } else if (currentSlide === 4) {
+                // Final interaction
+                playSound('bday');
+                triggerExplosion();
+            }
+        });
+
+        updateCountdown();
+        setInterval(updateCountdown, 50);
+    </script>
+</body>
+</html>
