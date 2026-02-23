@@ -70,14 +70,14 @@ userInput.addEventListener('keydown', async (e) => {
         output.appendChild(prevInput);
         
         if (step === 0) {
-            // First check
+            // First check: Birthday
             if (value === "24/02/2003") {
                 birthdayAnswer = value;
                 step++;
                 heart.textContent = "🌸";
                 heart.style.transform = "scale(1.2)";
 
-                // Use Local GIF from /public/
+                // Use Local GIF
                 await addGif('bubu-dudu-sseeyall.gif');
                 await typeMessage("Haii sayangkuu! Today has become more special because you were born into this world... 💖");
                 await typeMessage(messages[2]);
@@ -88,69 +88,50 @@ userInput.addEventListener('keydown', async (e) => {
             }
         } 
         else if (step === 1) {
-            anniversaryAnswer = value;
-            step++;
-            heart.textContent = "💝"; 
-            heart.style.transform = "scale(1.4)";
-            await typeMessage(messages[3]);
-            await verifyWithServer();
+            // Second check: Anniversary / First meeting
+            if (value === "07/11/2024") { 
+                anniversaryAnswer = value;
+                step++;
+                heart.textContent = "💝"; 
+                heart.style.transform = "scale(1.4)";
+                await typeMessage(messages[3]);
+                await verifyAccessLocally();
+            } else {
+                heart.textContent = "🥺";
+                await typeMessage("ERROR: Identity unconfirmed. Are you sure you're my one? 🤨", 'error');
+                await typeMessage("Wrong! I guess you're not my one... Try again, sayang! 😋", 'error');
+                step = 0;
+                setTimeout(async () => {
+                    heart.textContent = "🤍";
+                    await typeMessage("\n" + messages[1]); 
+                }, 1500);
+            }
         }
     }
 });
 
-async function verifyWithServer() {
-    try {
-        const response = await fetch('/verify-access', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ 
-                birthday: birthdayAnswer, 
-                anniversary: anniversaryAnswer 
-            })
-        });
-        
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.message || "Unauthorized");
-        }
+async function verifyAccessLocally() {
+    // Artificial delay to mimic verification
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-        const data = await response.json();
-        
-        if (data.success) {
-            heart.textContent = "💖";
-            heart.style.transform = "scale(1.6)";
-            await typeMessage(data.message, 'success');
-            
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#ffc0cb', '#daedff', '#ffffff'] 
-            });
-            
-            setTimeout(() => {
-                window.location.href = data.redirectUrl;
-            }, 3000);
-            
-        }
-    } catch (error) {
-        heart.textContent = "🥺";
-        heart.style.transform = "scale(1)";
-        if (error.message === "Unauthorized" || error.message.includes("boyfriend")) {
-            await typeMessage("ERROR: Identity unconfirmed. Are you sure you're my one? 🤨", 'error');
-            await typeMessage("Wrong! I guess you're not my one... Try again, sayang! 😋", 'error');
-        } else {
-            await typeMessage("SYSTEM CONNECTION ERROR. Make sure to open http://localhost:3000 in your browser! ❤️", 'error');
-        }
-        
-        // Reset to step 0 on error
-        step = 0;
-        setTimeout(async () => {
-            heart.textContent = "🤍";
-            await typeMessage("\n" + messages[1]); 
-        }, 1500);
-    }
+    heart.textContent = "💖";
+    heart.style.transform = "scale(1.6)";
+    await typeMessage("ACCESS GRANTED! Identity Confirmed. Welcome my one... 💖✨", 'success');
+    
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#ffc0cb', '#daedff', '#ffffff'] 
+    });
+    
+    setTimeout(() => {
+        window.location.href = 'surprise.html';
+    }, 3000);
 }
+
+// Remove the old verifyWithServer function since it won't work on GitHub Pages
+/*
+async function verifyWithServer() {
+...
+*/
